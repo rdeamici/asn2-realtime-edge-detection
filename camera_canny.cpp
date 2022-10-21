@@ -58,7 +58,7 @@ int main(int argc, char **argv)
    tlow = atof(argv[2]);
    thigh = atof(argv[3]);
    numimages = atoi(argv[4]);
-   
+
    rows = HEIGHT;
    cols = WIDTH;
 
@@ -77,15 +77,7 @@ int main(int argc, char **argv)
 
 	Mat frame, grayframe;
    printf("[INFO] taking %03d images in a row...\n", numimages);
-   // printf("[INFO] (On the pop-up window) Press ESC to start Canny edge detection...\n");
-      // for(;;)
-      // {
-		// cap >> frame;
-		// if( frame.empty() ) break; // end of video stream
-	    		// imshow("[RAW] this is you, smile! :)", frame);
-
-	    		// if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
-      // }
+   printf("----------------------\n");
 
    clock_t begin, mid, end;
    double time_elapsed, time_capture, time_process, total_time_elapsed = 0;
@@ -94,10 +86,10 @@ int main(int argc, char **argv)
    {
       begin = clock();
       //capture
-	    cap >> frame;
-	    mid = clock();
-	    cvtColor(frame, grayframe, COLOR_BGR2GRAY);
-	    image = grayframe.data;
+      cap >> frame;
+      mid = clock();
+      cvtColor(frame, grayframe, COLOR_BGR2GRAY);
+      image = grayframe.data;
 
       /****************************************************************************
       * Perform the edge detection. All of the work takes place here.
@@ -124,24 +116,14 @@ int main(int argc, char **argv)
       time_capture = (double) (mid - begin) / CLOCKS_PER_SEC;
       time_process = (double) (end - mid) / CLOCKS_PER_SEC;
       total_time_elapsed += time_elapsed;
-	   //  imshow("[GRAYSCALE] this is you, smile! :)", grayframe);
 
       printf("Elapsed time for capturing+processing one frame: %lf + %lf => %lf seconds\n", time_capture, time_process, time_elapsed);
-      
+      printf("current FPS: %01lf\n",NFRAME/time_elapsed);
 
-	    grayframe.data = edge;
-      // printf("[INFO] (On the pop-up window) Press ESC to terminate the program...\n");
-	   //  for(;;){
-	   // 	 imshow("[EDGE] this is you, smile! :)", grayframe);
-	   // 	 if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
-	   //  }
-
-       //free resrources    
-   //	   grayframe.release();
-   //    delete image;
       cur_image++;
    }
-   printf("FPS: %01lf\n", numimages/total_time_elapsed);
+      printf("----------------------\n");
+      printf("FINISHED\nAVERAGE FPS: %01lf\n", (double) numimages/total_time_elapsed);
 
    return 0;
 }
