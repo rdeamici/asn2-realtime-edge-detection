@@ -76,16 +76,18 @@ int main(int argc, char **argv)
    cap.set(CAP_PROP_FRAME_HEIGHT,HEIGHT);
 
 	 Mat frame, grayframe;
+   printf("[INFO] taking %03d images in a row...\n", numimages);
+   // printf("[INFO] (On the pop-up window) Press ESC to start Canny edge detection...\n");
    while (cur_image <= numimages)
    {
-      printf("[INFO] (On the pop-up window) Press ESC to start Canny edge detection...\n");
-      for(;;)
-      {
-	   		cap >> frame;
-	    		if( frame.empty() ) break; // end of video stream
-	    		imshow("[RAW] this is you, smile! :)", frame);
-	    		if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
-      }
+      // for(;;)
+      // {
+		cap >> frame;
+		if( frame.empty() ) break; // end of video stream
+	    		// imshow("[RAW] this is you, smile! :)", frame);
+
+	    		// if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
+      // }
 
       clock_t begin, mid, end;
       double time_elapsed, time_capture, time_process;
@@ -122,17 +124,17 @@ int main(int argc, char **argv)
       time_capture = (double) (mid - begin) / CLOCKS_PER_SEC;
       time_process = (double) (end - mid) / CLOCKS_PER_SEC;
 
-	    imshow("[GRAYSCALE] this is you, smile! :)", grayframe);
+	   //  imshow("[GRAYSCALE] this is you, smile! :)", grayframe);
 
       printf("Elapsed time for capturing+processing one frame: %lf + %lf => %lf seconds\n", time_capture, time_process, time_elapsed);
       printf("FPS: %01lf\n", NFRAME/time_elapsed);
 
 	    grayframe.data = edge;
-      printf("[INFO] (On the pop-up window) Press ESC to terminate the program...\n");
-	    for(;;){
-	   	 imshow("[EDGE] this is you, smile! :)", grayframe);
-	   	 if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
-	    }
+      // printf("[INFO] (On the pop-up window) Press ESC to terminate the program...\n");
+	   //  for(;;){
+	   // 	 imshow("[EDGE] this is you, smile! :)", grayframe);
+	   // 	 if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
+	   //  }
 
        //free resrources    
    //	   grayframe.release();
