@@ -16,6 +16,8 @@ using namespace cv;
 #define HEIGHT 480
 #define NFRAME 1.0
 
+int process_image(int cur_image);
+
 int main(int argc, char **argv)
 {
    char* dirfilename;        /* Name of the output gradient direction image */
@@ -23,7 +25,7 @@ int main(int argc, char **argv)
    char composedfname[128];  /* Name of the output "direction" image */
    unsigned char *image;     /* The input image */
    unsigned char *edge;      /* The output edge image */
-   int rows, cols;           /* The dimensions of the image. */
+   int rows, cols, res, numimages = 1;           /* The dimensions of the image. */
    float sigma,              /* Standard deviation of the gaussian kernel. */
 	 tlow,               /* Fraction of the high threshold in hysteresis. */
 	 thigh;              /* High hysteresis threshold control. The actual
@@ -35,8 +37,8 @@ int main(int argc, char **argv)
    /****************************************************************************
    * Get the command line arguments.
    ****************************************************************************/
-   if(argc < 4){
-   fprintf(stderr,"\n<USAGE> %s sigma tlow thigh [writedirim]\n",argv[0]);
+   if(argc < 5){
+   fprintf(stderr,"\n<USAGE> %s sigma tlow thigh [numimages] [writedirim]\n",argv[0]);
       fprintf(stderr,"      sigma:      Standard deviation of the gaussian");
       fprintf(stderr," blur kernel.\n");
       fprintf(stderr,"      tlow:       Fraction (0.0-1.0) of the high ");
@@ -45,35 +47,49 @@ int main(int argc, char **argv)
       fprintf(stderr," of non-zero edge\n                  strengths for ");
       fprintf(stderr,"hysteresis. The fraction is used to compute\n");
       fprintf(stderr,"                  the high edge strength threshold.\n");
+      fprintf(stderr,"      numimages:  argument to control number ");
+      fprintf(stderr,                  "of images to process.\n");
       fprintf(stderr,"      writedirim: Optional argument to output ");
-      fprintf(stderr,"a floating point");
-      fprintf(stderr," direction image.\n\n");
+      fprintf(stderr,                  "a floating point ");
+      fprintf(stderr,                  "direction image.\n\n");
       exit(1);
    }
 
    sigma = atof(argv[1]);
    tlow = atof(argv[2]);
    thigh = atof(argv[3]);
+   numimages = atoi(argv[4]);
+   
    rows = HEIGHT;
    cols = WIDTH;
 
-   if(argc == 5) dirfilename = (char *) "dummy";
+   if(argc == 6) dirfilename = (char *) "dummy";
 	 else dirfilename = NULL;
 
+   while (numimages) {
+      if ( process_image(numimages) != 0) {
+         printf("ERROR processing image #%03d",numimages);
+         return 0;
+      }
+      numimages--;
+   }
+}
+
+int process_image(int cur_image) {
    VideoCapture cap;
    // open the default camera (/dev/video0)
    // Check VideoCapture documentation for more details
-   if(!cap.open(0)){
-				cout<<"Failed to open /dev/video0"<<endl;
-        return 0;
-	 }
-	 cap.set(CAP_PROP_FRAME_WIDTH, WIDTH);
+   if(!cap.open(0)) {
+      cout<<"Failed to open /dev/video0"<<endl;
+      return 0;
+   }
+   cap.set(CAP_PROP_FRAME_WIDTH, WIDTH);
    cap.set(CAP_PROP_FRAME_HEIGHT,HEIGHT);
 
-	 Mat frame, grayframe;
+	Mat frame, grayframe;
 
    printf("[INFO] (On the pop-up window) Press ESC to start Canny edge detection...\n");
-	 for(;;)
+	for(;;)
    {
 			cap >> frame;
 	 		if( frame.empty() ) break; // end of video stream
@@ -86,10 +102,10 @@ int main(int argc, char **argv)
 
    begin = clock();
    //capture
-	 cap >> frame;
-	 mid = clock();
-	 cvtColor(frame, grayframe, COLOR_BGR2GRAY);
-	 image = grayframe.data;
+	cap >> frame;
+	mid = clock();
+	cvtColor(frame, grayframe, COLOR_BGR2GRAY);
+	image = grayframe.data;
 
    /****************************************************************************
    * Perform the edge detection. All of the work takes place here.
@@ -105,7 +121,7 @@ int main(int argc, char **argv)
    /****************************************************************************
    * Write out the edge image to a file.
    ****************************************************************************/
-   sprintf(outfilename, "camera_s_%3.2f_l_%3.2f_h_%3.2f.pgm", sigma, tlow, thigh);
+   sprintf(outfilename, "camera_s_%3.2f_l_%3.2f_h_%3.2f/frame%03d.pgm", sigma, tlow, thigh, cur_image);
    if(VERBOSE) printf("Writing the edge iname in the file %s.\n", outfilename);
    if(write_pgm_image(outfilename, edge, rows, cols, NULL, 255) == 0){
       fprintf(stderr, "Error writing the edge image, %s.\n", outfilename);
@@ -116,20 +132,20 @@ int main(int argc, char **argv)
    time_capture = (double) (mid - begin) / CLOCKS_PER_SEC;
    time_process = (double) (end - mid) / CLOCKS_PER_SEC;
 
-	 imshow("[GRAYSCALE] this is you, smile! :)", grayframe);
+	imshow("[GRAYSCALE] this is you, smile! :)", grayframe);
 
    printf("Elapsed time for capturing+processing one frame: %lf + %lf => %lf seconds\n", time_capture, time_process, time_elapsed);
    printf("FPS: %01lf\n", NFRAME/time_elapsed);
 
-	 grayframe.data = edge;
+	grayframe.data = edge;
    printf("[INFO] (On the pop-up window) Press ESC to terminate the program...\n");
-	 for(;;){
-		 imshow("[EDGE] this is you, smile! :)", grayframe);
-		 if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
-	 }
+	for(;;){
+		imshow("[EDGE] this is you, smile! :)", grayframe);
+		if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
+	}
 
     //free resrources    
 //		grayframe.release();
 //    delete image;
-    return 0;
+   return 0;
 }
