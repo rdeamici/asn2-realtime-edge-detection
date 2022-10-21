@@ -20,9 +20,7 @@ using namespace cv;
 
 int main(int argc, char **argv)
 {
-   // activate chrono namespace so we don't have to type chrono::mili
-   using namespacew std::chrono;
-
+   using namespace std::chrono;
    char* dirfilename;        /* Name of the output gradient direction image */
    char outfilename[128];    /* Name of the output "edge" image */
    char composedfname[128];  /* Name of the output "direction" image */
@@ -36,7 +34,7 @@ int main(int argc, char **argv)
 			        in the histogram of the magnitude of the
 			        gradient image that passes non-maximal
 			        suppression. */
-   auto start = steady_clock::now(); // start the wall clock timer
+   auto wall_start = steady_clock::now();
 
    /****************************************************************************
    * Get the command line arguments.
@@ -110,7 +108,7 @@ int main(int argc, char **argv)
       /****************************************************************************
       * Write out the edge image to a file.
       ****************************************************************************/
-      sprintf(outfilename, "frame%03d.pgm", sigma, tlow, thigh, cur_image);
+      sprintf(outfilename, "frame%03d.pgm", cur_image);
       if(VERBOSE) printf("Writing the edge iname in the file %s.\n", outfilename);
       if(write_pgm_image(outfilename, edge, rows, cols, NULL, 255) == 0){
          fprintf(stderr, "Error writing the edge image, %s.\n", outfilename);
@@ -122,15 +120,20 @@ int main(int argc, char **argv)
       time_process = (double) (end - mid) / CLOCKS_PER_SEC;
       total_time_elapsed += time_elapsed;
 
-      printf("Elapsed time for capturing+processing one frame: %lf + %lf => %lf seconds\n", time_capture, time_process, time_elapsed);
+      printf("Elapsed time for capturing+processing frame %d: %lf + %lf => %lf seconds\n", cur_image, time_capture, time_process, time_elapsed);
       printf("current FPS: %01lf\n",NFRAME/time_elapsed);
 
       cur_image++;
    }
 
-   auto end = steady_clock::now();
+   auto wall_end = steady_clock::now();
+   // chrono::duration<double> elapsed_seconds = wall_end - wall_start;
+   auto wall_seconds = duration_cast<seconds>(wall_end-wall_start);
+   auto wall_ms = duration_cast<milliseconds>(wall_end-wall_start);
    printf("----------------------\n");
    printf("FINISHED\nAVERAGE FPS: %01lf\n", (double) numimages/total_time_elapsed);
-   printf("Total time for program to run = %01lf seconds: %01lf milliseconds\n", duration_cast<seconds>(end-start).count(), duration_cast<milliseconds>((end-start)%1000).count();
+   cout << "Total time for program to run program = " << wall_seconds.count() << "." << (wall_ms%1000).count();
+   cout << " seconds" << endl;
    return 0;
 }
+
