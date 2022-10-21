@@ -2,6 +2,7 @@
 */
 #include <ctime>
 #include <iostream>
+#include <chrono>
 #include <unistd.h>
 #include "opencv2/opencv.hpp"
 #include "canny_util.h"
@@ -19,6 +20,9 @@ using namespace cv;
 
 int main(int argc, char **argv)
 {
+   // activate chrono namespace so we don't have to type chrono::mili
+   using namespacew std::chrono;
+
    char* dirfilename;        /* Name of the output gradient direction image */
    char outfilename[128];    /* Name of the output "edge" image */
    char composedfname[128];  /* Name of the output "direction" image */
@@ -32,6 +36,7 @@ int main(int argc, char **argv)
 			        in the histogram of the magnitude of the
 			        gradient image that passes non-maximal
 			        suppression. */
+   auto start = steady_clock::now(); // start the wall clock timer
 
    /****************************************************************************
    * Get the command line arguments.
@@ -105,7 +110,7 @@ int main(int argc, char **argv)
       /****************************************************************************
       * Write out the edge image to a file.
       ****************************************************************************/
-      sprintf(outfilename, "camera_s_%3.2f_l_%3.2f_h_%3.2f_frame%03d.pgm", sigma, tlow, thigh, cur_image);
+      sprintf(outfilename, "frame%03d.pgm", sigma, tlow, thigh, cur_image);
       if(VERBOSE) printf("Writing the edge iname in the file %s.\n", outfilename);
       if(write_pgm_image(outfilename, edge, rows, cols, NULL, 255) == 0){
          fprintf(stderr, "Error writing the edge image, %s.\n", outfilename);
@@ -122,8 +127,10 @@ int main(int argc, char **argv)
 
       cur_image++;
    }
-      printf("----------------------\n");
-      printf("FINISHED\nAVERAGE FPS: %01lf\n", (double) numimages/total_time_elapsed);
 
+   auto end = steady_clock::now();
+   printf("----------------------\n");
+   printf("FINISHED\nAVERAGE FPS: %01lf\n", (double) numimages/total_time_elapsed);
+   printf("Total time for program to run = %01lf seconds: %01lf milliseconds\n", duration_cast<seconds>(end-start).count(), duration_cast<milliseconds>((end-start)%1000).count();
    return 0;
 }
