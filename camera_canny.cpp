@@ -16,7 +16,6 @@ using namespace cv;
 #define HEIGHT 480
 #define NFRAME 1.0
 
-int process_image(int cur_image);
 
 int main(int argc, char **argv)
 {
@@ -66,16 +65,6 @@ int main(int argc, char **argv)
    if(argc == 6) dirfilename = (char *) "dummy";
 	 else dirfilename = NULL;
 
-   while (numimages) {
-      if ( process_image(numimages) != 0) {
-         printf("ERROR processing image #%03d",numimages);
-         return 0;
-      }
-      numimages--;
-   }
-}
-
-int process_image(int cur_image) {
    VideoCapture cap;
    // open the default camera (/dev/video0)
    // Check VideoCapture documentation for more details
