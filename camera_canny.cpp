@@ -24,7 +24,7 @@ int main(int argc, char **argv)
    char composedfname[128];  /* Name of the output "direction" image */
    unsigned char *image;     /* The input image */
    unsigned char *edge;      /* The output edge image */
-   int rows, cols, numimages;           /* The dimensions of the image. */
+   int rows, cols, numimages, cur_image=1;           /* The dimensions of the image. */
    float sigma,              /* Standard deviation of the gaussian kernel. */
 	 tlow,               /* Fraction of the high threshold in hysteresis. */
 	 thigh;              /* High hysteresis threshold control. The actual
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
    cap.set(CAP_PROP_FRAME_HEIGHT,HEIGHT);
 
 	 Mat frame, grayframe;
-   while (numimages)
+   while (cur_image <= numimages)
    {
       printf("[INFO] (On the pop-up window) Press ESC to start Canny edge detection...\n");
       for(;;)
@@ -102,8 +102,8 @@ int main(int argc, char **argv)
       ****************************************************************************/
       if(VERBOSE) printf("Starting Canny edge detection.\n");
       if(dirfilename != NULL){
-         sprintf(composedfname, "camera_s_%3.2f_l_%3.2f_h_%3.2f.fim",
-         sigma, tlow, thigh);
+         sprintf(composedfname, "camera_s_%3.2f_l_%3.2f_h_%3.2f_frame%03d.fim",
+         sigma, tlow, thigh, cur_image);
          dirfilename = composedfname;
       }
       canny(image, rows, cols, sigma, tlow, thigh, &edge, dirfilename);
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
       /****************************************************************************
       * Write out the edge image to a file.
       ****************************************************************************/
-      sprintf(outfilename, "camera_s_%3.2f_l_%3.2f_h_%3.2f/frame%03d.pgm", sigma, tlow, thigh, numimages);
+      sprintf(outfilename, "camera_s_%3.2f_l_%3.2f_h_%3.2f_frame%03d.pgm", sigma, tlow, thigh, cur_image);
       if(VERBOSE) printf("Writing the edge iname in the file %s.\n", outfilename);
       if(write_pgm_image(outfilename, edge, rows, cols, NULL, 255) == 0){
          fprintf(stderr, "Error writing the edge image, %s.\n", outfilename);
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
        //free resrources    
    //	   grayframe.release();
    //    delete image;
-      numimages--;
+      cur_image++;
    }
 
    return 0;
