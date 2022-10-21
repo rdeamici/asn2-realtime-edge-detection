@@ -75,23 +75,23 @@ int main(int argc, char **argv)
    cap.set(CAP_PROP_FRAME_WIDTH, WIDTH);
    cap.set(CAP_PROP_FRAME_HEIGHT,HEIGHT);
 
-	 Mat frame, grayframe;
+	Mat frame, grayframe;
    printf("[INFO] taking %03d images in a row...\n", numimages);
    // printf("[INFO] (On the pop-up window) Press ESC to start Canny edge detection...\n");
-   while (cur_image <= numimages)
-   {
       // for(;;)
       // {
-		cap >> frame;
-		if( frame.empty() ) break; // end of video stream
+		// cap >> frame;
+		// if( frame.empty() ) break; // end of video stream
 	    		// imshow("[RAW] this is you, smile! :)", frame);
 
 	    		// if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
       // }
 
-      clock_t begin, mid, end;
-      double time_elapsed, time_capture, time_process;
+   clock_t begin, mid, end;
+   double time_elapsed, time_capture, time_process, total_time_elapsed = 0;
 
+   while (cur_image <= numimages)
+   {
       begin = clock();
       //capture
 	    cap >> frame;
@@ -123,11 +123,11 @@ int main(int argc, char **argv)
       time_elapsed = (double) (end - begin) / CLOCKS_PER_SEC;
       time_capture = (double) (mid - begin) / CLOCKS_PER_SEC;
       time_process = (double) (end - mid) / CLOCKS_PER_SEC;
-
+      total_time_elapsed += time_elapsed;
 	   //  imshow("[GRAYSCALE] this is you, smile! :)", grayframe);
 
       printf("Elapsed time for capturing+processing one frame: %lf + %lf => %lf seconds\n", time_capture, time_process, time_elapsed);
-      printf("FPS: %01lf\n", NFRAME/time_elapsed);
+      
 
 	    grayframe.data = edge;
       // printf("[INFO] (On the pop-up window) Press ESC to terminate the program...\n");
@@ -141,6 +141,7 @@ int main(int argc, char **argv)
    //    delete image;
       cur_image++;
    }
+   printf("FPS: %01lf\n", numimages/total_time_elapsed);
 
    return 0;
 }
