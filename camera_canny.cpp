@@ -131,7 +131,8 @@ int main(int argc, char **argv)
    auto wall_seconds = duration_cast<seconds>(wall_end-wall_start);
    auto wall_ms = duration_cast<milliseconds>(wall_end-wall_start);
    printf("----------------------\n");
-   printf("FINISHED\nAVERAGE FPS: %01lf\n", (double) numimages/total_time_elapsed);
+   printf("FINISHED\nTOTAL CPU TIME: %01lf\n",total_time_elapsed);
+   printf("AVERAGE FPS: %01lf\n", (double) numimages/total_time_elapsed);
    cout << "Total time for program to run program = " << wall_seconds.count() << "." << (wall_ms%1000).count();
    cout << " seconds" << endl;
    return 0;
