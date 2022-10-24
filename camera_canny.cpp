@@ -78,7 +78,7 @@ int main(int argc, char **argv)
    cap.set(CAP_PROP_FRAME_WIDTH, WIDTH);
    cap.set(CAP_PROP_FRAME_HEIGHT,HEIGHT);
 
-	Mat frame, grayframe;
+   Mat frame, grayframe;
    printf("[INFO] taking %03d images in a row...\n", numimages);
    printf("----------------------\n");
 
