@@ -21,6 +21,9 @@ using namespace cv;
 int main(int argc, char **argv)
 {
    using namespace std::chrono;
+
+   auto wall_start = steady_clock::now();
+
    char* dirfilename;        /* Name of the output gradient direction image */
    char outfilename[128];    /* Name of the output "edge" image */
    char composedfname[128];  /* Name of the output "direction" image */
@@ -34,7 +37,6 @@ int main(int argc, char **argv)
 			        in the histogram of the magnitude of the
 			        gradient image that passes non-maximal
 			        suppression. */
-   auto wall_start = steady_clock::now();
 
    /****************************************************************************
    * Get the command line arguments.
@@ -68,6 +70,7 @@ int main(int argc, char **argv)
    if(argc == 6) dirfilename = (char *) "dummy";
 	 else dirfilename = NULL;
 
+   auto begin_camera_connection = steady_clock::now();
    VideoCapture cap;
    // open the default camera (/dev/video0)
    // Check VideoCapture documentation for more details
@@ -78,13 +81,15 @@ int main(int argc, char **argv)
    cap.set(CAP_PROP_FRAME_WIDTH, WIDTH);
    cap.set(CAP_PROP_FRAME_HEIGHT,HEIGHT);
 
+   auto end_camera_connection = steady_clock::now();
    Mat frame, grayframe;
-   printf("[INFO] taking %03d images in a row...\n", numimages);
+   printf("[INFO] taking %d images in a row...\n", numimages);
    printf("----------------------\n");
 
    clock_t begin, mid, end;
    double time_elapsed, time_capture, time_process, total_time_elapsed = 0;
 
+   auto begin_frame_capture = steady_clock::now();
    while (cur_image <= numimages)
    {
       begin = clock();
@@ -128,13 +133,17 @@ int main(int argc, char **argv)
 
    auto wall_end = steady_clock::now();
    // chrono::duration<double> elapsed_seconds = wall_end - wall_start;
-   auto wall_seconds = duration_cast<seconds>(wall_end-wall_start);
    auto wall_ms = duration_cast<milliseconds>(wall_end-wall_start);
+   auto camera_connection_time = duration_cast<milliseconds>(end_camera_connection - begin_camera_connection);
+   auto frame_capture_time = duration_cast<milliseconds>(wall_end - begin_frame_capture);
    printf("----------------------\n");
    printf("FINISHED\nTOTAL CPU TIME: %01lf\n",total_time_elapsed);
    printf("AVERAGE FPS: %01lf\n", (double) numimages/total_time_elapsed);
-   cout << "Total time for program to run program = " << wall_seconds.count() << "." << (wall_ms%1000).count();
-   cout << " seconds" << endl;
+
+   cout << "\nTime taken to establish connection to camera = " << camera_connection_time.count() << " milliseconds" << endl;
+   cout << "Time taken to capture and process all " << numimages << " frames = " << frame_capture_time.count() << " milliseconds" << endl;
+   cout << "Total time for program to run program = " << wall_ms.count() << " milliseconds" << endl;
+
    return 0;
 }
 
